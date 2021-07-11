@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<I c="SuperInteraction" i="interaction" m="interactions.base.super_interaction" n="MAL22:CloningMachineOverhaul_CloneSim_Actor_RemoteTurnOn" s="9314375707714915192">
+  <L n="_constraints">
+    <U>
+      <L n="constraints">
+        <U>
+          <V n="value" t="cone">
+            <U n="cone">
+              <T n="angle">70</T>
+              <T n="ideal_radius_max">0.2</T>
+              <T n="ideal_radius_min">0.1</T>
+              <T n="max_radius">5</T>
+              <T n="min_radius">1</T>
+            </U>
+          </V>
+        </U>
+      </L>
+    </U>
+    <U>
+      <L n="constraints">
+        <U>
+          <V n="value" t="facing">
+            <U n="facing">
+              <T n="inner_radius">0</T>
+              <T n="range">135</T>
+            </U>
+          </V>
+        </U>
+      </L>
+    </U>
+  </L>
+  <V n="_icon" t="participant">
+    <U n="participant">
+      <L n="participant_type">
+        <E>Object</E>
+      </L>
+    </U>
+  </V>
+  <V n="_saveable" t="enabled" />
+  <T n="allow_autonomous">False</T>
+  <T n="allow_user_directed">True</T>
+  <T n="attention_cost">0.5</T>
+  <V n="basic_content" t="one_shot">
+    <U n="one_shot">
+      <U n="animation_ref">
+        <T n="factory">107316<!--object_CloningMachine_RemoteTurnOn--></T>
+      </U>
+    </U>
+  </V>
+  <V n="content_score" t="disabled" />
+  <T n="display_name">0xC98D197E<!--Clone Sim--></T>
+  <U n="display_name_text_tokens">
+    <L n="tokens">
+      <V t="participant_type">
+        <U n="participant_type">
+          <V n="objects" t="from_participant">
+            <U n="from_participant">
+              <E n="participant">Actor</E>
+            </U>
+          </V>
+        </U>
+      </V>
+      <V t="participant_type">
+        <U n="participant_type">
+          <V n="objects" t="from_participant">
+            <U n="from_participant">
+              <E n="participant">Object</E>
+            </U>
+          </V>
+        </U>
+      </V>
+    </L>
+  </U>
+  <V n="display_name_wrappers" t="enabled">
+    <U n="enabled">
+      <L n="wrappers">
+        <U>
+          <L n="test">
+            <L>
+              <V t="trait">
+                <U n="trait">
+                  <L n="blacklist_traits">
+                    <T>200510<!--trait_Hidden_isDisguised--></T>
+                  </L>
+                </U>
+              </V>
+              <V t="sim_info_gameplay_options" />
+            </L>
+          </L>
+          <T n="wrapper">0xD20B3C9B<!--{0.String} <font color='#199C2C'>(+▰Fame)</font>--></T>
+        </U>
+      </L>
+    </U>
+  </V>
+  <L n="interaction_category_tags">
+    <E>Interaction_Super</E>
+    <E>Interaction_All</E>
+  </L>
+  <V n="outcome" t="single">
+    <U n="single">
+      <U n="actions">
+        <L n="continuation">
+          <U>
+            <T n="affordance">11817968315724769898<!--MAL22:CloningMachineOverhaul_PickSample--></T>
+          </U>
+        </L>
+        <T n="force_outcome_on_exit">True</T>
+      </U>
+    </U>
+  </V>
+  <E n="scoring_priority">NORMAL</E>
+  <T n="subaction_selection_weight">1</T>
+  <V n="super_affordance_compatibility" t="literal">
+    <U n="literal">
+      <V n="default_inclusion" t="exclude_all">
+        <U n="exclude_all">
+          <L n="include_affordances">
+            <T>0<!--107344cloningMachine_CloneSim_Picked_continuation--></T>
+          </L>
+        </U>
+      </V>
+    </U>
+  </V>
+  <E n="target_type">OBJECT</E>
+  <L n="test_globals">
+    <V t="sim_info">
+      <U n="sim_info">
+        <V n="ages" t="specified" />
+        <V n="species" t="specified">
+          <U n="specified">
+            <L n="species">
+              <E />
+            </L>
+          </U>
+        </V>
+        <E n="who">Actor</E>
+      </U>
+    </V>
+    <V t="has_parent_object">
+      <U n="has_parent_object">
+        <T n="negate">True</T>
+      </U>
+    </V>
+    <V t="state">
+      <U n="state">
+        <V n="tooltip" t="disabled" />
+        <T n="value">111992<!--osv_InventionConstructorUpgrade_Completed--></T>
+      </U>
+    </V>
+    <V t="state">
+      <U n="state">
+        <V n="fallback_behavior" t="always_pass" />
+        <V n="tooltip" t="enabled">
+          <T n="enabled">0x1DB3D754<!--Cannot perform this interaction on a broken object. Repair it first.--></T>
+        </V>
+        <T n="value">15081<!--BrokenState_Unbroken--></T>
+      </U>
+    </V>
+    <V t="slot_test">
+      <U n="slot_test">
+        <V n="child_slot" t="by_reference">
+          <T n="by_reference">slot_CloningMachineSource</T>
+        </V>
+        <V n="slot_test_type" t="has_empty_slot" />
+        <V n="tooltip" t="enabled">
+          <T n="enabled">0xF7DC5A28<!--Cannot Clone a Sim while an object is on the machine--></T>
+        </V>
+      </U>
+    </V>
+    <V t="slot_test">
+      <U n="slot_test">
+        <V n="child_slot" t="by_reference">
+          <T n="by_reference">slot_CloningMachineClone</T>
+        </V>
+        <V n="slot_test_type" t="has_empty_slot" />
+        <V n="tooltip" t="enabled">
+          <T n="enabled">0x7EFB378A<!--The clone slot is currently occupied by another object.--></T>
+        </V>
+      </U>
+    </V>
+    <V t="household_size">
+      <U n="household_size">
+        <V n="tooltip" t="enabled">
+          <T n="enabled">0xAC4514CE<!--Cannot Exceed 8 Sims in a household--></T>
+        </V>
+      </U>
+    </V>
+  </L>
+  <T n="time_overhead">30</T>
+  <T n="visible">True</T>
+</I>

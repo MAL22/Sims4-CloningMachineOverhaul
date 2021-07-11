@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<I c="SuperInteraction" i="interaction" m="interactions.base.super_interaction" n="cloningMachine_CloneSim_Picked_continuation" s="107344">
+  <V n="_icon" t="participant">
+    <U n="participant">
+      <L n="participant_type">
+        <E>Object</E>
+      </L>
+    </U>
+  </V>
+  <V n="_saveable" t="enabled" />
+  <T n="_super_affordance_can_share_target">True</T>
+  <T n="allow_autonomous">False</T>
+  <T n="allow_user_directed">False</T>
+  <T n="attention_cost">0.5</T>
+  <V n="basic_content" t="flexible_length">
+    <U n="flexible_length">
+      <L n="conditional_actions">
+        <V t="list_reference">
+          <T n="list_reference">40705<!--ExitConditionList_MotivesNearFail--></T>
+        </V>
+        <V t="literal">
+          <U n="literal">
+            <L n="conditions">
+              <V t="state_based">
+                <U n="state_based">
+                  <V n="state" t="on_trigger">
+                    <T n="on_trigger">15080<!--BrokenState_Broken--></T>
+                  </V>
+                </U>
+              </V>
+            </L>
+            <E n="interaction_action">EXIT_CANCEL</E>
+          </U>
+        </V>
+        <V t="literal">
+          <U n="literal">
+            <L n="conditions">
+              <V t="time_based">
+                <U n="time_based">
+                  <T n="max_time">8</T>
+                  <T n="min_time">8</T>
+                </U>
+              </V>
+            </L>
+            <E n="interaction_action">EXIT_NATURALLY</E>
+          </U>
+        </V>
+      </L>
+      <V n="content" t="looping_content">
+        <U n="looping_content">
+          <U n="animation_ref">
+            <T n="factory">107319<!--object_CloningMachine_CloneSim--></T>
+          </U>
+        </U>
+      </V>
+    </U>
+  </V>
+  <L n="basic_liabilities">
+    <V t="save_lock">
+      <U n="save_lock">
+        <T n="save_lock_tooltip">0x984D549D<!--Unavailable during cloning process--></T>
+      </U>
+    </V>
+  </L>
+  <V n="content_score" t="disabled" />
+  <T n="display_name">0xF143B33A<!--Cloning--></T>
+  <U n="display_name_text_tokens">
+    <L n="tokens">
+      <V t="participant_type">
+        <U n="participant_type">
+          <V n="objects" t="from_participant">
+            <U n="from_participant">
+              <E n="participant">Actor</E>
+            </U>
+          </V>
+        </U>
+      </V>
+      <V t="participant_type">
+        <U n="participant_type">
+          <V n="objects" t="from_participant">
+            <U n="from_participant">
+              <E n="participant">Object</E>
+            </U>
+          </V>
+        </U>
+      </V>
+    </L>
+  </U>
+  <L n="interaction_category_tags">
+    <E>Interaction_Super</E>
+    <E>Interaction_All</E>
+  </L>
+  <V n="outcome" t="dual">
+    <U n="dual">
+      <U n="failure_actions">
+        <L n="basic_extras">
+          <V t="create_sim">
+            <U n="create_sim">
+              <V n="household_option" t="active_household" />
+              <L n="relationship_bits_to_add">
+                <T>8802<!--family_brother_sister--></T>
+                <T>109549<!--relationshipBit_IsClone--></T>
+              </L>
+              <V n="sim_info_source" t="clone_a_sim">
+                <U n="clone_a_sim">
+                  <V n="sim_spawn_slot" t="by_type">
+                    <U n="by_type">
+                      <T n="slot_type">slot_CloningMachineSim</T>
+                    </U>
+                  </V>
+                </U>
+              </V>
+              <V n="spawn_action" t="affordance">
+                <U n="affordance">
+                  <T n="spawn_affordance">115349<!--cloningMachine_OnSpawn_Failure--></T>
+                </U>
+              </V>
+              <V n="timing" t="at_end">
+                <U n="at_end">
+                  <E n="criticality">NotCritical</E>
+                </U>
+              </V>
+            </U>
+          </V>
+          <V t="notification">
+            <U n="notification">
+              <V n="dialog" t="single">
+                <V n="single" t="literal">
+                  <U n="literal">
+                    <V n="icon" t="enabled">
+                      <V n="enabled" t="participant">
+                        <U n="participant">
+                          <L n="participant_type">
+                            <E>Object</E>
+                          </L>
+                        </U>
+                      </V>
+                    </V>
+                    <V n="text" t="single">
+                      <T n="single">0xA0994994<!--Oops...Looks like something did not go quite right with the cloning process.--></T>
+                    </V>
+                  </U>
+                </V>
+              </V>
+            </U>
+          </V>
+          <V t="vfx">
+            <U n="vfx">
+              <V n="participant" t="from_participant">
+                <U n="from_participant">
+                  <E n="participant">Object</E>
+                </U>
+              </V>
+              <U n="success_chance">
+                <T n="base_chance">100</T>
+                <L n="multipliers" />
+              </U>
+              <V n="timing" t="at_beginning">
+                <U n="at_beginning">
+                  <V n="offset_time" t="disabled" />
+                </U>
+              </V>
+              <U n="vfx">
+                <T n="effect_name">ep1_cloning_machine_clone_sim_fail</T>
+                <V n="joint_name" t="Slot">
+                  <T n="Slot">_FX_1</T>
+                </V>
+              </U>
+            </U>
+          </V>
+          <V t="state_change">
+            <U n="state_change">
+              <V n="new_value" t="single_value">
+                <U n="single_value">
+                  <T n="new_value">98746<!--GenericFX_Off--></T>
+                </U>
+              </V>
+              <V n="timing" t="at_end" />
+            </U>
+          </V>
+          <V t="state_change">
+            <U n="state_change">
+              <V n="new_value" t="single_value">
+                <U n="single_value">
+                  <T n="new_value">35296<!--GenericOnOff_On--></T>
+                </U>
+              </V>
+              <V n="timing" t="at_end" />
+            </U>
+          </V>
+        </L>
+        <L n="continuation">
+          <U>
+            <T n="affordance">109298<!--cloningMachine_View--></T>
+          </U>
+        </L>
+        <L n="loot_list">
+          <T>113946<!--loot_Statistic_Breakage_CloningMachine_CloneSim_Fail--></T>
+          <T>199572<!--loot_Fame_CloneSim--></T>
+        </L>
+      </U>
+      <U n="success_actions">
+        <L n="basic_extras">
+          <V t="vfx">
+            <U n="vfx">
+              <V n="timing" t="at_beginning" />
+              <U n="vfx">
+                <T n="effect_name">ep1_cloning_machine_clone_sim</T>
+                <V n="joint_name" t="Slot">
+                  <T n="Slot">_FX_1</T>
+                </V>
+              </U>
+            </U>
+          </V>
+          <V t="create_sim">
+            <U n="create_sim">
+              <V n="household_option" t="active_household" />
+              <L n="relationship_bits_to_add">
+                <T>8802<!--family_brother_sister--></T>
+                <T>109549<!--relationshipBit_IsClone--></T>
+              </L>
+              <V n="sim_info_source" t="clone_a_sim">
+                <U n="clone_a_sim">
+                  <E n="participant">Actor</E>
+                  <V n="sim_spawn_slot" t="by_type">
+                    <U n="by_type">
+                      <T n="slot_type">slot_CloningMachineSim</T>
+                    </U>
+                  </V>
+                </U>
+              </V>
+              <V n="spawn_action" t="affordance">
+                <U n="affordance">
+                  <T n="spawn_affordance">115356<!--cloningMachine_OnSpawn_Success--></T>
+                </U>
+              </V>
+              <U n="success_chance">
+                <T n="base_chance">100</T>
+              </U>
+              <V n="timing" t="at_end" />
+            </U>
+          </V>
+        </L>
+        <L n="continuation">
+          <U>
+            <T n="affordance">109298<!--cloningMachine_View--></T>
+          </U>
+        </L>
+        <L n="loot_list">
+          <T>113945<!--loot_Statistic_Breakage_CloningMachine_CloneSimSuccess--></T>
+          <T>199572<!--loot_Fame_CloneSim--></T>
+        </L>
+      </U>
+      <U n="success_chance">
+        <T n="base_chance">50</T>
+        <L n="multipliers">
+          <U>
+            <T n="multiplier">1.4</T>
+            <L n="tests">
+              <L>
+                <V t="career_test">
+                  <U n="career_test">
+                    <V n="test_type" t="career_reference">
+                      <U n="career_reference">
+                        <V n="career" t="specific_career">
+                          <T n="specific_career">107255<!--career_Adult_Active_Scientist--></T>
+                        </V>
+                        <V n="user_level" t="enabled">
+                          <U n="enabled">
+                            <T n="lower_bound">7</T>
+                          </U>
+                        </V>
+                      </U>
+                    </V>
+                  </U>
+                </V>
+              </L>
+            </L>
+          </U>
+          <U>
+            <T n="multiplier">1.4</T>
+            <L n="tests">
+              <L>
+                <V t="buff">
+                  <U n="buff">
+                    <V n="whitelist" t="enabled">
+                      <L n="enabled">
+                        <T>12845<!--MoodBuff_Hidden_Inspired--></T>
+                        <T>12844<!--MoodBuff_Hidden_Imaginative--></T>
+                        <T>12839<!--MoodBuff_Hidden_Focused--></T>
+                        <T>12846<!--MoodBuff_Hidden_InTheZone--></T>
+                        <T>12830<!--MoodBuff_Hidden_Confident--></T>
+                        <T>12814<!--MoodBuff_Hidden_Fearless--></T>
+                        <T>27107<!--MoodBuff_Hidden_Muser(TraitReplacement)--></T>
+                        <T>37939<!--MoodBuff_Hidden_Muserer(TraitReplacement)--></T>
+                      </L>
+                    </V>
+                  </U>
+                </V>
+              </L>
+            </L>
+          </U>
+        </L>
+      </U>
+    </U>
+  </V>
+  <T n="pie_menu_priority">5</T>
+  <E n="scoring_priority">NORMAL</E>
+  <T n="subaction_selection_weight">1</T>
+  <V n="super_affordance_compatibility" t="literal">
+    <U n="literal">
+      <V n="default_inclusion" t="exclude_all">
+        <U n="exclude_all">
+          <L n="include_affordances">
+            <T>107351<!--cloningMachine_CloneSim_Actor_RemoteTurnOn--></T>
+          </L>
+        </U>
+      </V>
+    </U>
+  </V>
+  <E n="target_type">OBJECT</E>
+  <L n="test_globals">
+    <V t="sim_info">
+      <U n="sim_info">
+        <V n="ages" t="specified">
+          <L n="specified">
+            <E>TEEN</E>
+            <E>YOUNGADULT</E>
+            <E>ADULT</E>
+            <E>ELDER</E>
+            <E>CHILD</E>
+          </L>
+        </V>
+        <V n="species" t="specified">
+          <U n="specified">
+            <L n="species">
+              <E />
+            </L>
+          </U>
+        </V>
+        <E n="who">Actor</E>
+      </U>
+    </V>
+    <V t="has_parent_object">
+      <U n="has_parent_object">
+        <T n="negate">True</T>
+      </U>
+    </V>
+    <V t="household_size">
+      <U n="household_size">
+        <V n="test_type" t="count">
+          <U n="count">
+            <U n="count">
+              <E n="comparison">GREATER_OR_EQUAL</E>
+              <T n="value">1</T>
+            </U>
+          </U>
+        </V>
+      </U>
+    </V>
+  </L>
+  <T n="time_overhead">15</T>
+</I>
