@@ -53,60 +53,37 @@ def extract_folder(ea_folder, gameplay_folder):
                 extract_subfolder(root, filename, ea_folder)
 
 
-def old_compile_module(creator_name, root, mods_folder, mod_name=None, use_creator_name=True):
-    src = os.path.join(root, 'src')
-    if not mod_name:
-        mod_name=os.path.basename(os.path.normpath(os.path.dirname(os.path.realpath('__file__'))))
-
-    if use_creator_name:
-        mod_name = creator_name + '_' + mod_name
-    ts4script = os.path.join(root, mod_name + '.ts4script')
-
-    ts4script_mods = os.path.join(os.path.join(mods_folder), mod_name + '.ts4script')
-
-    zf = PyZipFile(ts4script, mode='w', compression=ZIP_STORED, allowZip64=True, optimize=2)
-    for folder, subs, files in os.walk(src):
-        zf.writepy(folder)
-    zf.close()
-    shutil.copyfile(ts4script, ts4script_mods)
-
-
-def compile_module(creator_name, root, mods_folder, mod_name=None):
-    if not mod_name:
-        mod_name = os.path.basename(os.path.normpath(os.path.dirname(os.path.realpath('__file__'))))
-
+def compile_module(creator_name, mod_name, root_path, src_path, temp_path, build_path, mods_folder):
     mod_name = creator_name + '_' + mod_name
     mod_archive = mod_name + '.ts4script'
 
-    src = root # os.path.join(root, 'src')
-    temp_folder = os.path.join(root, 'temp')
-
-    ts4script_mods = os.path.join(mods_folder, mod_archive)
-
     exclude_file = {'copy.py', 'compile.py', f"{mod_archive}"}
-    exclude_folder = {'__pycache__', 'temp', 'package'}
+    exclude_folder = {'__pycache__', 'temp', 'assets'}
 
     print('Scanning \'{}\'...'.format(mod_name.replace(creator_name + '_', '')))
     print('Ignoring file{}: {}'.format('s' if len(exclude_file) > 1 else '', ', '.join(exclude_file)))
     print('Ignoring folder{}: {}'.format('s' if len(exclude_folder) > 1 else '', ', '.join(exclude_folder)))
 
-    if os.path.exists(os.path.join(src, mod_archive)):
-        os.remove(os.path.join(src, mod_archive))
-        print('Removed \'{}\' from project folder'.format(os.path.basename(mod_archive)))
+    if os.path.exists(os.path.join(mods_folder, mod_archive)):
+        os.remove(os.path.join(mods_folder, mod_archive))
+        print('Removed \'{}\' from mods folder'.format(mod_archive))
 
-    if os.path.exists(ts4script_mods):
-        os.remove(ts4script_mods)
-        print('Removed \'{}\' from mods folder'.format(os.path.basename(mod_archive)))
-
-    if not os.path.exists(temp_folder):
-        os.makedirs(temp_folder)
+    if not os.path.exists(temp_path):
+        os.makedirs(temp_path)
         print('Created temporary directory')
 
-    zip_file = PyZipFile(os.path.join(src, mod_archive), mode='w', compression=ZIP_STORED, allowZip64=True, optimize=2)
+    if not os.path.exists(build_path):
+        os.makedirs(build_path)
+        print('Created build folder in project folder')
+    elif os.path.exists(os.path.join(src_path, mod_archive)):
+        os.remove(os.path.join(src_path, mod_archive))
+        print('Removed \'{}\' from project folder'.format(mod_archive))
 
-    for folder, subs, files in os.walk(src):
-        rel_module_path = ''.join(folder.rsplit(root))
-        module_folder = os.path.join(temp_folder, *rel_module_path[1:].split('\\')[1:])
+    zip_file = PyZipFile(os.path.join(build_path, mod_archive), mode='w', compression=ZIP_STORED, allowZip64=True, optimize=2)
+
+    for folder, subs, files in os.walk(src_path):
+        rel_module_path = ''.join(folder.rsplit(root_path))
+        module_folder = os.path.join(temp_path, *rel_module_path[1:].split('\\')[1:])
 
         if not os.path.exists(module_folder):
             os.makedirs(module_folder)
@@ -117,10 +94,9 @@ def compile_module(creator_name, root, mods_folder, mod_name=None):
             print('Found {} script(s): {}'.format(len(files), ', '.join(files)))
         for file in files:
             shutil.copyfile(os.path.join(folder, file), os.path.join(module_folder, file))
-            # import_file_dependencies(module_folder, folder, file)
 
-    print('Packaging \'{}\' and all dependencies...'.format(os.path.basename(ts4script_mods)))
-    for folder, subs, files in os.walk(temp_folder):
+    print('Packaging \'{}\'...'.format(mod_archive))
+    for folder, subs, files in os.walk(temp_path):
         subs[:] = [sub for sub in subs if sub not in exclude_folder]
         for file in files:
             zip_file.writepy(os.path.join(folder, file), os.path.relpath(folder, 'temp'))
@@ -129,13 +105,30 @@ def compile_module(creator_name, root, mods_folder, mod_name=None):
 
     response = ''
     while response not in ['y', 'n']:
-        response = input('Copy \'{}\' to the Sims 4 mods folder? (Y/N): '.format(os.path.basename(ts4script_mods))).casefold()
-
+        response = input('Copy \'{}\' to the Sims 4 mods folder? (Y/N): '.format(mod_archive)).casefold()
     if response == 'y':
-        shutil.copyfile(os.path.join(src, mod_archive), ts4script_mods)
+        shutil.copyfile(os.path.join(build_path, mod_archive), os.path.join(mods_folder, mod_archive))
 
-    shutil.rmtree(temp_folder)
+    shutil.rmtree(temp_path)
     print('Packaging complete!')
+
+
+def copy_module(root, mods_folder):
+    src = os.path.join(root, 'src')
+
+    py_scripts = os.path.join(mods_folder, '!!modding', 'Scripts')
+
+    exclude = set(['__pycache__'])
+
+    for folder, subs, files in os.walk(src):
+        subs[:] = [sub for sub in subs if sub not in exclude]
+        rel_module_path = ''.join(folder.rsplit(root))
+        module_path = os.path.join(py_scripts, *rel_module_path[1:].split('\\')[1:])
+        for file in files:
+            fsrc = os.path.join(folder, file)
+            fdst = os.path.join(module_path, file)
+            print('\t' + fsrc + '\n\t' + fdst)
+            shutil.copyfile(fsrc, fdst)
 
 
 def import_file_dependencies(temp, root, file):
@@ -144,7 +137,8 @@ def import_file_dependencies(temp, root, file):
     len_imports = len(imports)
 
     if len_imports > 0:
-        print('Importing {} dependenc{} for \'{}\': {}'.format(len_imports, 'y' if len_imports == 1 else 'ies', file, ', '.join(imports)))
+        print('Importing {} dependenc{} for \'{}\': {}'.format(len_imports, 'y' if len_imports == 1 else 'ies', file,
+                                                               ', '.join(imports)))
         mod_finder = modulefinder.ModuleFinder()
         mod_finder.run_script(path)
 
@@ -171,25 +165,8 @@ def import_file_dependencies(temp, root, file):
                     for sub in subs:
                         temp_path = os.path.join(temp_path, sub)
                         if os.path.exists(os.path.join(folder, sub, '__init__.py')):
-                            shutil.copyfile(os.path.join(folder, sub, '__init__.py'), os.path.join(temp_path, '__init__.py'))
+                            shutil.copyfile(os.path.join(folder, sub, '__init__.py'),
+                                            os.path.join(temp_path, '__init__.py'))
 
                 shutil.copyfile(mod.__file__, os.path.join(temp, dependency_path, dependency_filename))
                 import_file_dependencies(temp, os.path.dirname(mod.__file__), dependency_filename)
-
-
-def copy_module(root, mods_folder):
-    src = os.path.join(root, 'src')
-
-    py_scripts = os.path.join(mods_folder, '!!modding', 'Scripts')
-
-    exclude = set(['__pycache__'])
-
-    for folder, subs, files in os.walk(src):
-        subs[:] = [sub for sub in subs if sub not in exclude]
-        rel_module_path = ''.join(folder.rsplit(root))
-        module_path = os.path.join(py_scripts, *rel_module_path[1:].split('\\')[1:])
-        for file in files:
-            fsrc = os.path.join(folder, file)
-            fdst = os.path.join(module_path, file)
-            print('\t' + fsrc + '\n\t' + fdst)
-            shutil.copyfile(fsrc, fdst)

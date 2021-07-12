@@ -1,9 +1,7 @@
 import fnmatch
 import os
 from zipfile import PyZipFile, ZIP_STORED
-
 import shutil
-
 import io
 from Utilities.unpyc3 import decompile
 import fnmatch

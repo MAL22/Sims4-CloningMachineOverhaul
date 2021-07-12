@@ -1,5 +1,10 @@
 __pycache__/
 .idea/
 venv/
+temp/
+build/
+EA/
 *.pyc
 *.pyo
+*.ts4script
+settings.py
