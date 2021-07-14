@@ -1,7 +1,9 @@
 import fnmatch
 import os
 from zipfile import PyZipFile, ZIP_STORED
+
 import shutil
+
 import io
 from Utilities.unpyc3 import decompile
 import fnmatch
@@ -46,7 +48,7 @@ def extract_folder(ea_folder, gameplay_folder):
 
 
 def compile_module(creator_name, root, mods_folder,mod_name=None):
-    src = os.path.join(root, 'src')
+    src = os.path.join(root, 'Scripts')
     if not mod_name:
         mod_name=os.path.basename(os.path.normpath(os.path.dirname(os.path.realpath('__file__'))))
 
@@ -60,14 +62,3 @@ def compile_module(creator_name, root, mods_folder,mod_name=None):
         zf.writepy(folder)
     zf.close()
     shutil.copyfile(ts4script, ts4script_mods)
-
-
-def copy_module(root, mods_folder):
-    src = os.path.join(root, 'src')
-
-    py_scripts = os.path.join(mods_folder, '!!modding', 'src')
-
-    for folder, subs, files in os.walk(src):
-        for file in files:
-            shutil.copyfile(os.path.join(src, file), py_scripts)
-

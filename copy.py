@@ -1,4 +1,5 @@
 from Utilities import copy_module
 from settings import *
 
-copy_module(root_path, mods_folder)
+root = os.path.join('__file__')
+copy_module(root_path, src_path, dev_path)

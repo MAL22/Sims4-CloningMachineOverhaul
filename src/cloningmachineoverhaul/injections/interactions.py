@@ -11,17 +11,32 @@ from services import get_instance_manager
 from sims4.tuning.tunable import HasTunableSingletonFactory, AutoFactoryInit, TunableReference, TunableMapping, Tunable
 
 
-class TunableCloningInteractions(HasTunableSingletonFactory, AutoFactoryInit):
+class TunableCloningMachineInteractions(HasTunableSingletonFactory, AutoFactoryInit):
     FACTORY_TUNABLES = {
-        'cloning_interactions': TunableMapping(description='',
-                                               key_type=Tunable(description='', tunable_type=str),
-                                               value_type=TunableReference(description='', manager=get_instance_manager(Types.INTERACTION))
-                                               ),
+        'cloning_machine_interactions': TunableMapping(
+            description='',
+            key_type=Tunable(description='', tunable_type=str),
+            value_type=TunableReference(
+                description='',
+                manager=get_instance_manager(Types.INTERACTION)
+            )
+        ),
 
     }
 
 
-@injector(InstanceManager, 'load_data_into_class_instances')
+class CloningInteractionsInjector(HasTunableReference, metaclass=HashedTunedInstanceMetaclass, manager=services.get_instance_manager(Types.SNIPPET)):
+    INSTANCE_TUNABLES = TunableCloningMachineInteractions.TunableFactory()
+
+    @classmethod
+    def _tuning_loaded_callback(cls):
+        tuning = get_resource_key(TuningId.CLONING_MACHINE_OBJECT, Types.OBJECT)
+        dict = {}
+        if tuning and hasattr(tuning, '_super_affordances'):
+            tuning._super_affordances += dict.values()
+
+
+'''@injector(InstanceManager, 'load_data_into_class_instances')
 def cmo_load_data_into_class_instances(original, self, *args, **kwargs) -> None:
     original(self)
 
@@ -38,10 +53,11 @@ def cmo_load_data_into_class_instances(original, self, *args, **kwargs) -> None:
             get_tuning(TuningId.CMO_SAMPLE_PICKER),
         )
 
-    for tuning_id in [TuningId.CLONE_ON_SPAWN_FAILURE, TuningId.CLONE_ON_SPAWN_SUCCESS, TuningId.CLONE_POST_SPAWN_FAILURE, TuningId.CLONE_POST_SPAWN_SUCCESS]:
+    for tuning_id in [TuningId.CLONE_ON_SPAWN_FAILURE, TuningId.CLONE_ON_SPAWN_SUCCESS,
+                      TuningId.CLONE_POST_SPAWN_FAILURE, TuningId.CLONE_POST_SPAWN_SUCCESS]:
         key = get_resource_key(tuning_id, Types.INTERACTION)
         tuning = get_instance_manager(Types.INTERACTION)._tuned_classes.get(key)
         if tuning:
             for test in tuning.test_globals:
                 if type(test) is SimInfoTest:
-                    test.ages = test.ages + [Age.TODDLER]
+                    test.ages = test.ages + [Age.TODDLER]'''
