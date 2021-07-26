@@ -1,6 +1,7 @@
 import services
 import sims4
 from cloningmachineoverhaul.enums.cloning_params import SexualPreference, Sex, Genitalia, Fertility, RelationshipBit, VoiceActor
+from cloningmachineoverhaul.enums.interactions import EAAffordances, CMOAffordances
 from cloningmachineoverhaul.enums.tunings import TuningId
 from m22lib.utils.files import M22ConfigFileManager, M22LogFileManager
 from m22lib.tunings.tuning_utils import get_tuning
@@ -158,7 +159,7 @@ class CloningSettings:
         family_sibling_rel_bit = instance_manager.get(get_resource_key(RelationshipBit.SIBLING, Types.RELATIONSHIP_BIT))
         clone_rel_bit = instance_manager.get(get_resource_key(TuningId.CLONE_RELATIONSHIP_BIT, Types.RELATIONSHIP_BIT))
 
-        key = sims4.resources.get_resource_key(TuningId.CMO_CLONE_SIM_PICKED_CONTINUATION, Types.INTERACTION)
+        key = sims4.resources.get_resource_key(EAAffordances.CloningMachine.CLONE_SIM_PICKED_CONTINUATION, Types.INTERACTION)
         tuning = services.get_instance_manager(Types.INTERACTION)._tuned_classes.get(key)
 
         def inject_to_continuation(relationship_bits, genealogy=None):

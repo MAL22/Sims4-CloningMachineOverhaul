@@ -11,7 +11,7 @@
   <L n="basic_extras">
     <V t="do_command">
       <U n="do_command">
-        <T n="command">cmo.relbit_menu</T>
+        <T n="command">cmo.voiceactor_menu</T>
       </U>
     </V>
   </L>

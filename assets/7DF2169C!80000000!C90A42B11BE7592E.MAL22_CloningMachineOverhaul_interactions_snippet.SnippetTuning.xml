@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<I c="CloningInteractionsInjector" i="snippet" m="cloningmachineoverhaul.injections.interactions" n="MAL22:CloningMachineOverhaul_interactions_snippet" s="16939256661364433653">
+  <L n="cloning_machine_interactions">
+    <U>
+      <E n="key">clone_sim_picked_continuation</E>
+      <U n="value">14999347551935352568</U>
+    </U>
+    <U>
+      <E n="key">clone_age</E>
+      <U n="value">9371521673239749027</U>
+    </U>
+    <U>
+      <E n="key">clone_gender</E>
+      <U n="value">11432917489339026765</U>
+    </U>
+    <U>
+      <E n="key">clone_frame</E>
+      <U n="value">11947372226508659309</U>
+    </U>
+    <U>
+      <E n="key">clone_relbit</E>
+      <U n="value">9364282875800952896</U>
+    </U>
+    <U>
+      <E n="key">clone_sim_remote_turn_on</E>
+      <U n="value">9314375707714915192</U>
+    </U>
+    <U>
+      <E n="key">clone_sample_picker</E>
+      <U n="value">16098788197477225012</U>
+    </U>
+  </L>
+</I>

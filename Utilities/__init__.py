@@ -1,11 +1,11 @@
-from zipfile import PyZipFile, ZIP_STORED
-
-import shutil
-
-import io
-from Utilities.unpyc3 import decompile
 import fnmatch
 import os
+import shutil
+import io
+import subprocess
+
+from zipfile import PyZipFile, ZIP_STORED
+from Utilities.unpyc3 import decompile
 
 
 def decompile_dir(rootPath):
@@ -105,15 +105,63 @@ def compile_module(creator_name, mod_name, root_path, src_path, temp_path, build
     print('Packaging complete!')
 
 
-def copy_module(root_path, src_path, dev_path):
+def copy_module(root_path, src_path, dev_path, dev_scripts_path):
     exclude = {'__pycache__', 'EA'}
 
+    file_count = 0
     for folder, subs, files in os.walk(src_path):
         subs[:] = [sub for sub in subs if sub not in exclude]
         rel_module_path = ''.join(folder.rsplit(root_path))
-        module_path = os.path.join(dev_path, *rel_module_path[1:].split('\\')[1:])
+        module_path = os.path.join(dev_scripts_path, *rel_module_path[1:].split('\\')[1:])
         for file in files:
             fsrc = os.path.join(folder, file)
             fdst = os.path.join(module_path, file)
-            print('\t' + fsrc + '\n\t' + fdst)
+            # print('\t' + fsrc + '\n\t' + fdst)
+            # print(f'{os.path.join(rel_module_path, file)}')
             shutil.copyfile(fsrc, fdst)
+            file_count += 1
+    print(f'Copied {file_count} script(s)')
+
+
+def copy_packages(assets_path, dev_path, *args):
+    try:
+        if len(args) == 0:
+            args = find_package_files(assets_path)
+
+        for package in args:
+            src_path = os.path.join(assets_path, package)
+            dest_path = os.path.join(dev_path, package)
+            shutil.copyfile(src_path, dest_path)
+            # print(package)
+        print(f'Copied {len(args)} package(s)')
+        subprocess.run(['explorer.exe', os.path.dirname(dest_path)])
+    except IOError as e:
+        print(e)
+
+
+def find_package_files(assets_path):
+    package_list = []
+    for folder, subs, files in os.walk(assets_path):
+        for file in files:
+            _, ext = os.path.splitext(file)
+            if ext == '.package':
+                package_list.append(file)
+    return package_list
+
+
+def launch_sims4studio(s4s_executable, assets_path, dev_path):
+    package_list = find_package_files(assets_path)
+    if len(package_list) == 1:
+        subprocess.run([s4s_executable, os.path.join(assets_path, package_list[0])])
+        copy_packages(assets_path, dev_path, *package_list)
+    else:
+        response = -1
+        for idx, package in enumerate(package_list):
+            print(f'{idx}: {package}')
+        while response == -1:
+            try:
+                response = int(input('Input the number of the package file to edit: '))
+            except ValueError as e:
+                return
+        subprocess.run([s4s_executable, os.path.join(assets_path, package_list[response])])
+        copy_packages(assets_path, dev_path, *package_list)

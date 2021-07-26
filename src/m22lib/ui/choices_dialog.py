@@ -4,12 +4,11 @@ import os
 import ui.ui_dialog_service
 from m22lib.utils.injector import injector
 from m22lib.utils.localization import LocalizedString
+from m22lib.utils.files import M22LogFileManager
 from sims4.localization import LocalizationHelperTuning, _create_localized_string
 from ui.ui_dialog import ButtonType, UiDialog, UiDialogResponse
 
-
-LOG_FILE_NAME = 'output.log'
-_dir = os.path.dirname(os.path.realpath(__file__))
+_log = M22LogFileManager('cmo')
 
 
 class UiDialogChoices(UiDialog):
@@ -46,7 +45,7 @@ def display_choices_dialog_respond_hook(original, self, *args, **kwargs):
         result = original(self, *args, **kwargs)
         return result
     except Exception as e:
-        write_to_log(e)
+        _log.write(e)
 
 
 def display_choices(choices, choice_callback, text: LocalizedString = None, title: LocalizedString = None):
@@ -63,7 +62,7 @@ def display_choices(choices, choice_callback, text: LocalizedString = None, titl
         # default cancel choice:
         dlg._choice_responses.append(UiDialogResponse(dialog_response_id=ButtonType.DIALOG_RESPONSE_CANCEL, text=lambda **_: LocalizationHelperTuning.get_raw_text("Cancel"), ui_request=UiDialogResponse.UiDialogUiRequest.NO_REQUEST))
     except Exception as e:
-        write_to_log(e)
+        _log.write(e)
 
     # response handler calling the choice_callback of the user:
     def choice_response_callback(dialog):
@@ -77,7 +76,7 @@ def display_choices(choices, choice_callback, text: LocalizedString = None, titl
             else:
                 choice_callback(None)
         except Exception as e:
-            write_to_log(e)
+            _log.write(e)
 
     # show ui:
     dlg.add_listener(choice_response_callback)
@@ -85,12 +84,3 @@ def display_choices(choices, choice_callback, text: LocalizedString = None, titl
     dlg_service = services.ui_dialog_service()
     dlg_service._active_dialogs[dlg.dialog_id] = dlg
     dlg.show_dialog()
-
-
-def write_to_log(line, show_timestamp: bool = True):
-    log = open(os.path.join(_dir, LOG_FILE_NAME), 'a')
-    if show_timestamp:
-        log.write('[{}] {}\n'.format(str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')), line))
-    else:
-        log.write('{}\n'.format(line))
-    log.close()

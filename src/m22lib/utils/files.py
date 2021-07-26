@@ -24,12 +24,12 @@ def cmd_current_directory(_connection=None) -> str:
     output = sims4.commands.CheatOutput(_connection)
     output(str(get_current_directory()))
     output(str(__file__))
-    output(str(type(__file__)))
+    output(os.path.dirname(__file__))
 
 
 def get_current_directory() -> str:
     split_path = str(__file__).split('\\')
-    return os.path.join(*split_path[:len(split_path) - 4])
+    return os.path.join(split_path[0], os.sep, *split_path[:len(split_path) - 4])
 
 
 def generate_timestamp(append_brackets: bool = True, include_time: bool = True) -> str:

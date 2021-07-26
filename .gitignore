@@ -7,4 +7,4 @@ EA/
 *.pyc
 *.pyo
 *.ts4script
-settings.py
+/settings.py

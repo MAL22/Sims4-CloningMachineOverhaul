@@ -9,8 +9,10 @@ from interactions.context import InteractionContext, QueueInsertStrategy, Intera
 from interactions.priority import Priority
 from cloningmachineoverhaul.enums.cloning_params import Sex, RelationshipBit, Fertility, FemaleFertility, MaleFertility, \
     Genitalia, VoiceActor
-from cloningmachineoverhaul.enums.strings import StringTable
+from cloningmachineoverhaul.enums.strings import Strings
 from cloningmachineoverhaul.enums.tunings import TuningId
+from cloningmachineoverhaul.enums.objects import Objects
+from cloningmachineoverhaul.enums.interactions import EAAffordances, CMOAffordances
 from cloningmachineoverhaul.settings.settings_cloning import CloningSettings
 from m22lib.ui.choices_dialog import display_choices
 from m22lib.utils.localization import LocalizedString
@@ -46,7 +48,8 @@ with sims4.reload.protected(globals()):
 @error_watcher()
 def load_config():
     global cloning_settings, _log
-    _log = M22LogFileManager(LOG_FILENAME_PREFIX)
+    _log = M22LogFileManager(LOG_FILENAME_PREFIX, timestamped_filename=False)
+
     _log.write('{}\'s {} version {} initializing...'.format(MOD_AUTHOR, MOD_NAME, MOD_VER))
 
     cloning_settings = CloningSettings()
@@ -94,7 +97,7 @@ def cmo_dna_sample_picker(sim_id, object_id, _connection=None, *args):
             if dialog.picked_results:
                 dna_sim_info = inv_objs[dialog.picked_results[0]].get_stored_sim_info()
                 context = InteractionContext(sim_inst, InteractionContext.SOURCE_SCRIPT, Priority.High, insert_strategy=QueueInsertStrategy.FIRST, bucket=InteractionBucketType.DEFAULT)
-                res = sim_inst.push_super_affordance(get_tuning(TuningId.CMO_CLONE_SIM_PICKED_CONTINUATION), object_inst, context)
+                res = sim_inst.push_super_affordance(get_tuning(CMOAffordances.CloningMachine.CLONE_SIM_PICKED_CONTINUATION), object_inst, context)
                 _log.write(f'{res.interaction.get_participants(participant_type=ParticipantType.Actor)}')
                 _log.write(f'Creating a clone of {dna_sim_info.first_name} {dna_sim_info.last_name}')
         except Exception as e:
@@ -103,13 +106,13 @@ def cmo_dna_sample_picker(sim_id, object_id, _connection=None, *args):
     try:
         picker_dialog = UiObjectPicker.TunableFactory().default(
             sim_info,
-            text=LocalizedString(StringTable.CMO_DNA_PICKER_DIALOG_DESC).string,
-            title=LocalizedString(StringTable.CMO_DNA_PICKER_DIALOG_TITLE).string,
+            text=LocalizedString(Strings.DnaPickerMenu.CMO_DNA_PICKER_DIALOG_DESC).string,
+            title=LocalizedString(Strings.DnaPickerMenu.CMO_DNA_PICKER_DIALOG_TITLE).string,
             picker_type=UiObjectPicker.UiObjectPickerObjectPickerType.OBJECT,
             min_selectable=1,
             max_selectable=1
         )
-        inv_objs = [sample for sample in sim_inst.inventory_component if sample.definition.id == TuningId.DNA_SAMPLE_OBJECT_DEFINITION]
+        inv_objs = [sample for sample in sim_inst.inventory_component if sample.definition.id == Objects.DNA_SAMPLE_OBJECT]
         for index, inv_obj in enumerate(inv_objs):
             picker_dialog.add_row(ObjectPickerRow(option_id=index, icon=inv_obj.get_icon_override(), object_id=inv_obj.id, def_id=inv_obj.definition.id))
         picker_dialog.add_listener(callback)
@@ -131,12 +134,13 @@ def cmo_dna_picker_status(_connection=None):
 @injector(SimCreationElement._CloneSimInfoSource, 'get_sim_infos_and_positions')
 def cmo_get_sim_infos_and_positions(original, self, resolver, household):
     global dna_sim_info
-    _log.write(f'cmo_get_sim_infos_and_positions')
-
     try:
-        if resolver.affordance == get_tuning(TuningId.SPELLS_SELF_CLONE) or resolver.affordance == get_tuning(TuningId.CLONE_SIM_PICKED_CONTINUATION):
-            _log.write(f'cmo_get_sim_infos_and_positions: executing original code...')
+        _log.write(f'{resolver.affordance}')
+        if resolver.affordance == get_tuning(EAAffordances.Spellcasters.SPELLS_SELF_CLONE) or resolver.affordance == get_tuning(EAAffordances.CloningMachine.CLONE_SIM_PICKED_CONTINUATION):
+            _log.write(f'ea_get_sim_infos_and_positions')
             return original(self, resolver, household)
+        _log.write(f'cmo_get_sim_infos_and_positions')
+
         use_fgl = False
         clone_sim_info = self._create_clone_sim_info(dna_sim_info, resolver, household)
         if clone_sim_info is None:
@@ -161,10 +165,11 @@ def __cmo_call__(original, self, actor_sim_info, created_sim_info):
 
 @injector(SimCreationElement, '_do_behavior')
 def cmo_do_behavior(original, self):
-    _log.write(f'cmo_do_behavior')
 
     if dna_sim_info is None:
+        _log.write(f'ea_do_behavior')
         return original(self)
+    _log.write(f'cmo_do_behavior')
 
     resolver = self.interaction.get_resolver()
     target_participant = dna_sim_info
@@ -191,10 +196,11 @@ def cmo_do_behavior(original, self):
 def create_clone_sim_info(original, self, source_sim_info, resolver, household):
     global cloning_settings
     global dna_sim_info
-    _log.write(f'create_clone_sim_info')
 
-    if resolver.affordance == get_tuning(TuningId.SPELLS_SELF_CLONE):
+    if resolver.affordance == get_tuning(EAAffordances.Spellcasters.SPELLS_SELF_CLONE):
+        _log.write(f'ea_create_clone_sim_info')
         return original(self, source_sim_info, resolver, household)
+    _log.write(f'cmo_create_clone_sim_info')
     sim_creator = SimCreator(
         gender=source_sim_info.gender,
         age=source_sim_info.age,
@@ -279,7 +285,7 @@ def show_clone_gender_menu(_connection=None):
         elif result == 2:
             cloning_settings.gender = Gender.FEMALE
 
-    display_choices([StringTable.AUTOMATIC, StringTable.MALE, StringTable.FEMALE], handle_result, text=LocalizedString(StringTable.CMO_GENDER_MENU_DESC, get_gender_text()), title=LocalizedString(StringTable.CMO_GENDER_MENU_TITLE))
+    display_choices([Strings.Gender.AUTOMATIC, Strings.Gender.MALE, Strings.Gender.FEMALE], handle_result, text=LocalizedString(Strings.GenderMenu.GENDER_MENU_DESC, get_gender_text()), title=LocalizedString(Strings.GenderMenu.GENDER_MENU_TITLE))
 
 
 @error_watcher()
@@ -297,7 +303,7 @@ def show_clone_relbit_menu(_connection=None):
         elif result == 2:
             cloning_settings.relationship_bit = RelationshipBit.NONE
 
-    display_choices([StringTable.RELBIT_SIBLING, StringTable.RELBIT_OFFSPRING, StringTable.NEITHER], handle_result, text=LocalizedString(StringTable.CMO_RELBIT_MENU_DESC, get_relbit_text()), title=LocalizedString(StringTable.CMO_RELBIT_MENU_TITLE))
+    display_choices([Strings.Relbit.SIBLING, Strings.Relbit.OFFSPRING, Strings.GenericMenu.NEITHER], handle_result, text=LocalizedString(Strings.RelbitMenu.CMO_RELBIT_MENU_DESC, get_relbit_text()), title=LocalizedString(Strings.RelbitMenu.CMO_RELBIT_MENU_TITLE))
 
 
 @error_watcher()
@@ -325,7 +331,7 @@ def show_clone_age_menu(_connection=None):
         elif result == 7:
             cloning_settings.age = Age.ELDER
 
-    display_choices([StringTable.AUTOMATIC, StringTable.BABY, StringTable.TODDLER, StringTable.CHILD, StringTable.TEEN, StringTable.YOUNGADULT, StringTable.ADULT, StringTable.ELDER], handle_result, text=LocalizedString(StringTable.CMO_AGE_MENU_DESC, get_age_text()), title=LocalizedString(StringTable.CMO_AGE_MENU_TITLE))
+    display_choices([Strings.Age.AUTOMATIC, Strings.Age.BABY, Strings.Age.TODDLER, Strings.Age.CHILD, Strings.Age.TEEN, Strings.Age.YOUNGADULT, Strings.Age.ADULT, Strings.Age.ELDER], handle_result, text=LocalizedString(Strings.AgeMenu.AGE_MENU_DESC, get_age_text()), title=LocalizedString(Strings.AgeMenu.AGE_MENU_TITLE))
 
 
 @error_watcher()
@@ -343,7 +349,7 @@ def show_clone_sex_menu(_connection=None):
         elif result == 2:
             cloning_settings.sex = Sex.FEMALE
 
-    display_choices([StringTable.AUTOMATIC, StringTable.MALE, StringTable.FEMALE], handle_result, text=LocalizedString(StringTable.CMO_BODY_SEX_MENU_DESC, get_sex_text()), title=LocalizedString(StringTable.CMO_BODY_SEX_MENU_TITLE))
+    display_choices([Strings.GenericMenu.AUTOMATIC, Strings.Gender.MALE, Strings.Gender.FEMALE], handle_result, text=LocalizedString(Strings.BodySexMenu.BODY_SEX_MENU_DESC, get_sex_text()), title=LocalizedString(Strings.BodySexMenu.BODY_SEX_MENU_TITLE))
 
 
 @error_watcher()
@@ -361,7 +367,7 @@ def show_clone_genitalia_menu(_connection=None):
         elif result == 2:
             cloning_settings.sex = Sex.FEMALE
 
-    display_choices([StringTable.AUTOMATIC, StringTable.MALE, StringTable.FEMALE], handle_result, text=LocalizedString(StringTable.CMO_GENITALIA_MENU_DESC, get_sex_text()), title=LocalizedString(StringTable.CMO_GENITALIA_MENU_TITLE))
+    display_choices([Strings.GenericMenu.AUTOMATIC, Strings.Gender.MALE, Strings.Gender.FEMALE], handle_result, text=LocalizedString(Strings.GenitaliaMenu.GENITALIA_MENU_DESC, get_sex_text()), title=LocalizedString(Strings.GenitaliaMenu.GENITALIA_MENU_TITLE))
 
 
 @error_watcher()
@@ -379,19 +385,7 @@ def show_clone_fertility(_connection=None):
         elif result == 2:
             cloning_settings.sex = Sex.FEMALE
 
-    display_choices([StringTable.AUTOMATIC, StringTable.MALE, StringTable.FEMALE], handle_result, text=LocalizedString(StringTable.CMO_FERTILITY_MENU_DESC, get_sex_text()), title=LocalizedString(StringTable.CMO_FERTILITY_MENU_TITLE))
-
-
-"""def old_change_gender(sim_info):
-    sim_info.gender = (Gender.MALE if sim_info.gender == Gender.FEMALE else Gender.FEMALE)
-
-    tracker = sim_info.get_tracker(GlobalGenderPreferenceTuning.GENDER_PREFERENCE[Gender.MALE])
-    male_pref = tracker.get_value(GlobalGenderPreferenceTuning.GENDER_PREFERENCE[Gender.MALE])
-    female_pref = tracker.get_value(GlobalGenderPreferenceTuning.GENDER_PREFERENCE[Gender.FEMALE])
-    tracker.set_value(GlobalGenderPreferenceTuning.GENDER_PREFERENCE[Gender.MALE], female_pref)
-    tracker.set_value(GlobalGenderPreferenceTuning.GENDER_PREFERENCE[Gender.FEMALE], male_pref)
-
-    sim_info.save_sim()"""
+    display_choices([Strings.Gender.AUTOMATIC, Strings.Gender.MALE, Strings.Gender.FEMALE], handle_result, text=LocalizedString(Strings.FertilityMenu.FERTILITY_MENU_DESC, get_sex_text()), title=LocalizedString(Strings.FertilityMenu.FERTILITY_MENU_TITLE))
 
 
 @error_watcher()
@@ -418,7 +412,8 @@ def show_clone_sex_menu(_connection=None):
             cloning_settings.voice_actor = VoiceActor.BRASH
 
 
-    display_choices([StringTable.AUTOMATIC, StringTable.VOICE_MELODIC, StringTable.VOICE_SWEET, StringTable.VOICE_LILTED, StringTable.VOICE_CLEAR, StringTable.VOICE_WARM, StringTable.VOICE_BRASH], handle_result, text=LocalizedString(StringTable.CMO_BODY_SEX_MENU_DESC, get_sex_text()), title=LocalizedString(StringTable.CMO_BODY_SEX_MENU_TITLE))
+    display_choices([Strings.GenericMenu.AUTOMATIC, Strings.VoiceTypes.VOICE_MELODIC, Strings.VoiceTypes.VOICE_SWEET, Strings.VoiceTypes.VOICE_LILTED, Strings.VoiceTypes.VOICE_CLEAR, Strings.VoiceTypes.VOICE_WARM, Strings.VoiceTypes.VOICE_BRASH],
+                    handle_result, text=LocalizedString(Strings.BodySexMenu.BODY_SEX_MENU_DESC, get_sex_text()), title=LocalizedString(Strings.BodySexMenu.BODY_SEX_MENU_TITLE))
 
 
 def set_first_name(sim_info):
@@ -555,78 +550,78 @@ def change_genitalia(sim_info):
 def get_age_text():
     global cloning_settings
     if cloning_settings.age == 0:
-        return StringTable.AUTOMATIC
+        return Strings.Age.AUTOMATIC
     elif cloning_settings.age == Age.BABY:
-        return StringTable.BABY
+        return Strings.Age.BABY
     elif cloning_settings.age == Age.TODDLER:
-        return StringTable.TODDLER
+        return Strings.Age.TODDLER
     elif cloning_settings.age == Age.CHILD:
-        return StringTable.CHILD
+        return Strings.Age.CHILD
     elif cloning_settings.age == Age.TEEN:
-        return StringTable.TEEN
+        return Strings.Age.TEEN
     elif cloning_settings.age == Age.YOUNGADULT:
-        return StringTable.YOUNGADULT
+        return Strings.Age.YOUNGADULT
     elif cloning_settings.age == Age.ADULT:
-        return StringTable.ADULT
+        return Strings.Age.ADULT
     elif cloning_settings.age == Age.ELDER:
-        return StringTable.ELDER
+        return Strings.Age.ELDER
 
 
 def get_gender_text():
     global cloning_settings
     if cloning_settings.gender == 0:
-        return StringTable.AUTOMATIC
+        return Strings.Gender.AUTOMATIC
     elif cloning_settings.gender == Gender.MALE:
-        return StringTable.MALE
+        return Strings.Gender.MALE
     elif cloning_settings.gender == Gender.FEMALE:
-        return StringTable.FEMALE
+        return Strings.Gender.FEMALE
 
 
 def get_sex_text():
     global cloning_settings
     _log.write(cloning_settings.sex)
     if cloning_settings.sex == 0:
-        return StringTable.AUTOMATIC
+        return Strings.Gender.AUTOMATIC
     elif cloning_settings.sex == Sex.MALE:
-        return StringTable.MALE
+        return Strings.Gender.MALE
     elif cloning_settings.sex == Sex.FEMALE:
-        return StringTable.FEMALE
+        return Strings.Gender.FEMALE
 
 
 def get_fertility_text():
     global cloning_settings
     _log.write(cloning_settings.fertility)
     if cloning_settings.fertility == Fertility.AUTOMATIC:
-        return StringTable.AUTOMATIC
+        return Strings.FertilityMenu.AUTOMATIC
     elif cloning_settings.fertility == Fertility.BOTH:
-        return StringTable.BOTH
+        return Strings.FertilityMenu.BOTH
     elif cloning_settings.fertility == Fertility.NEITHER:
-        return StringTable.NEITHER
+        return Strings.FertilityMenu.NEITHER
     elif cloning_settings.fertility == Fertility.CAN_BE_IMPREGNATED:
-        return StringTable.CAN_BE_IMPREGNATED
+        return Strings.FertilityMenu.CAN_BE_IMPREGNATED
     elif cloning_settings.fertility == Fertility.CAN_IMPREGNATE:
-        return StringTable.CAN_IMPREGNATE
+        return Strings.FertilityMenu.CAN_IMPREGNATE
 
 
 def get_genitalia_text():
     global cloning_settings
     _log.write(cloning_settings.genitalia)
     if cloning_settings.genitalia == Genitalia.AUTOMATIC:
-        return StringTable.AUTOMATIC
+        return Strings.Gender.AUTOMATIC
     elif cloning_settings.genitalia == Genitalia.MALE:
-        return StringTable.MALE
+        return Strings.Gender.MALE
     elif cloning_settings.genitalia == Genitalia.FEMALE:
-        return StringTable.FEMALE
+        return Strings.Gender.FEMALE
 
 
 def get_relbit_text():
     global cloning_settings
     if cloning_settings.relationship_bit == RelationshipBit.NONE:
-        return 0
+        return Strings.Relbit.DEFAULT
     elif cloning_settings.relationship_bit == RelationshipBit.OFFSPRING:
-        return StringTable.RELBIT_OFFSPRING
+        return Strings.Relbit.OFFSPRING
     elif cloning_settings.relationship_bit == RelationshipBit.SIBLING:
-        return StringTable.RELBIT_SIBLING
+        return Strings.Relbit.SIBLING
 
 
 def get_voice_actor_text():
