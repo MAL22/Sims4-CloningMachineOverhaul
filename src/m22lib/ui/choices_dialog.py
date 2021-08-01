@@ -8,7 +8,7 @@ from m22lib.utils.files import M22LogFileManager
 from sims4.localization import LocalizationHelperTuning, _create_localized_string
 from ui.ui_dialog import ButtonType, UiDialog, UiDialogResponse
 
-_log = M22LogFileManager('cmo')
+_log = M22LogFileManager('m22lib', timestamped_filename=False)
 
 
 class UiDialogChoices(UiDialog):

@@ -7,14 +7,15 @@ from event_testing.resolver import SingleSimResolver
 from interactions import ParticipantType
 from interactions.context import InteractionContext, QueueInsertStrategy, InteractionBucketType
 from interactions.priority import Priority
+from sims4.localization import LocalizationHelperTuning
 from cloningmachineoverhaul.enums.cloning_params import Sex, RelationshipBit, Fertility, FemaleFertility, MaleFertility, \
     Genitalia, VoiceActor
 from cloningmachineoverhaul.enums.strings import Strings
-from cloningmachineoverhaul.enums.tunings import TuningId
 from cloningmachineoverhaul.enums.objects import Objects
 from cloningmachineoverhaul.enums.interactions import EAAffordances, CMOAffordances
 from cloningmachineoverhaul.settings.settings_cloning import CloningSettings
 from m22lib.ui.choices_dialog import display_choices
+from m22lib.ui.input_dialog import show_rename_sim_dialog
 from m22lib.utils.localization import LocalizedString
 from m22lib.tunings.tuning_utils import get_tuning
 from m22lib.utils.files import M22LogFileManager
@@ -23,7 +24,6 @@ from m22lib.exceptions.exception_watcher import error_watcher
 from interactions.utils.creation import SimCreationElement
 from sims.aging import aging_element
 from sims.sim_info_lod import SimInfoLODLevel
-from sims.sim_info_tests import SimInfoTest
 from sims.sim_spawner import SimSpawner, SimCreator
 from sims.sim_info_types import Age, Gender
 from sims4.resources import Types, get_resource_key
@@ -35,7 +35,7 @@ MOD_NAME = 'Cloning Machine Overhaul'
 MOD_VER = '2021.02.23-beta'
 
 CLONE_SETTINGS_FILENAME = 'cmo_settings'
-LOG_FILENAME_PREFIX = 'cmo'
+LOG_FILENAME_PREFIX = 'CloningMachineOverhaul_log'
 
 with sims4.reload.protected(globals()):
     # _log = sims4.log.Logger(LOG_FILENAME_PREFIX, default_owner='MAL22')
@@ -106,17 +106,26 @@ def cmo_dna_sample_picker(sim_id, object_id, _connection=None, *args):
     try:
         picker_dialog = UiObjectPicker.TunableFactory().default(
             sim_info,
-            text=LocalizedString(Strings.DnaPickerMenu.CMO_DNA_PICKER_DIALOG_DESC).string,
-            title=LocalizedString(Strings.DnaPickerMenu.CMO_DNA_PICKER_DIALOG_TITLE).string,
+            text=None,
+            title=LocalizedString(Strings.DnaPickerMenu.DNA_PICKER_DIALOG_TITLE).string,
             picker_type=UiObjectPicker.UiObjectPickerObjectPickerType.OBJECT,
             min_selectable=1,
             max_selectable=1
         )
         inv_objs = [sample for sample in sim_inst.inventory_component if sample.definition.id == Objects.DNA_SAMPLE_OBJECT]
         for index, inv_obj in enumerate(inv_objs):
-            picker_dialog.add_row(ObjectPickerRow(option_id=index, icon=inv_obj.get_icon_override(), object_id=inv_obj.id, def_id=inv_obj.definition.id))
+            stored_sim_info = inv_obj.get_stored_sim_info()
+
+            row = ObjectPickerRow(
+                option_id=index, icon=None,
+                object_id=inv_obj.id, def_id=inv_obj.definition.id,
+                row_description=LocalizationHelperTuning.get_raw_text(f'{stored_sim_info.first_name} {stored_sim_info.last_name}'),
+            )
+            picker_dialog.add_row(row)
+
         picker_dialog.add_listener(callback)
         picker_dialog.show_dialog()
+
     except Exception as e:
         _log.write(f'cmo_dna_sample_picker {e}')
 
@@ -152,7 +161,7 @@ def cmo_get_sim_infos_and_positions(original, self, resolver, household):
             use_fgl = self.force_fgl or position is None
         return ((clone_sim_info, position, location, use_fgl),)
     except Exception as e:
-        _log.write(f'cmo_get_sim_infos_and_positions {e}')
+        _log.write(f'get_sim_infos_and_positions {e}')
         return ()
 
 
@@ -201,6 +210,7 @@ def create_clone_sim_info(original, self, source_sim_info, resolver, household):
         _log.write(f'ea_create_clone_sim_info')
         return original(self, source_sim_info, resolver, household)
     _log.write(f'cmo_create_clone_sim_info')
+
     sim_creator = SimCreator(
         gender=source_sim_info.gender,
         age=source_sim_info.age,
@@ -259,6 +269,20 @@ def create_clone_sim_info(original, self, source_sim_info, resolver, household):
     change_genitalia(clone_sim_info)
     change_age(clone_sim_info)
 
+    def rename_sim_callback(dialog):
+        if dialog.accepted:
+            _log.write(clone_sim_info)
+            clone_sim_info.first_name = dialog.text_input_responses.get('input_field_0')
+            clone_sim_info.last_name = dialog.text_input_responses.get('input_field_1')
+
+    show_rename_sim_dialog(
+        rename_sim_callback,
+        Strings.SimNameMenu.RENAME_SIM_DIALOG_TITLE,
+        Strings.SimNameMenu.RENAME_SIM_DIALOG_DESC,
+        SimSpawner.get_random_first_name(cloning_settings.gender, clone_sim_info.species),
+        clone_sim_info.last_name,
+    )
+
     clone_sim_info.set_default_data()
     clone_sim_info.save_sim()
     household.save_data()
@@ -303,7 +327,7 @@ def show_clone_relbit_menu(_connection=None):
         elif result == 2:
             cloning_settings.relationship_bit = RelationshipBit.NONE
 
-    display_choices([Strings.Relbit.SIBLING, Strings.Relbit.OFFSPRING, Strings.GenericMenu.NEITHER], handle_result, text=LocalizedString(Strings.RelbitMenu.CMO_RELBIT_MENU_DESC, get_relbit_text()), title=LocalizedString(Strings.RelbitMenu.CMO_RELBIT_MENU_TITLE))
+    display_choices([Strings.Relbit.SIBLING, Strings.Relbit.OFFSPRING], handle_result, text=LocalizedString(Strings.RelbitMenu.RELBIT_MENU_DESC, get_relbit_text()), title=LocalizedString(Strings.RelbitMenu.RELBIT_MENU_TITLE))
 
 
 @error_watcher()
@@ -317,21 +341,19 @@ def show_clone_age_menu(_connection=None):
         if result == 0:
             cloning_settings.age = 0
         elif result == 1:
-            cloning_settings.age = Age.BABY
-        elif result == 2:
             cloning_settings.age = Age.TODDLER
-        elif result == 3:
+        elif result == 2:
             cloning_settings.age = Age.CHILD
-        elif result == 4:
+        elif result == 3:
             cloning_settings.age = Age.TEEN
-        elif result == 5:
+        elif result == 4:
             cloning_settings.age = Age.YOUNGADULT
-        elif result == 6:
+        elif result == 5:
             cloning_settings.age = Age.ADULT
-        elif result == 7:
+        elif result == 6:
             cloning_settings.age = Age.ELDER
 
-    display_choices([Strings.Age.AUTOMATIC, Strings.Age.BABY, Strings.Age.TODDLER, Strings.Age.CHILD, Strings.Age.TEEN, Strings.Age.YOUNGADULT, Strings.Age.ADULT, Strings.Age.ELDER], handle_result, text=LocalizedString(Strings.AgeMenu.AGE_MENU_DESC, get_age_text()), title=LocalizedString(Strings.AgeMenu.AGE_MENU_TITLE))
+    display_choices([Strings.Age.AUTOMATIC, Strings.Age.TODDLER, Strings.Age.CHILD, Strings.Age.TEEN, Strings.Age.YOUNGADULT, Strings.Age.ADULT, Strings.Age.ELDER], handle_result, text=LocalizedString(Strings.AgeMenu.AGE_MENU_DESC, get_age_text()), title=LocalizedString(Strings.AgeMenu.AGE_MENU_TITLE))
 
 
 @error_watcher()
@@ -428,7 +450,7 @@ def change_age(sim_info):
     global cloning_settings
     if cloning_settings.age == 0:
         # Age of source sim is the same as the selected CMO setting; do nothing.
-        return 
+        return
     sim_info.change_age(cloning_settings.age, sim_info.age)
     clone_sim_age_up = aging_element.AgeUp(sim_info)
     clone_sim_age_up.show_age_up_dialog(True)

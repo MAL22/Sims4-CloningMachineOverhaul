@@ -95,7 +95,7 @@ class M22TraitsFileManager(M22FileManager):
 class M22ConfigFileManager(M22FileManager):
     def __init__(self, filename: str, file_extension: str = 'cfg', log_filename: str = 'output'):
         super().__init__(filename, file_extension, False)
-        self.log = M22LogFileManager(log_filename)
+        self.log = M22LogFileManager(log_filename, timestamped_filename=False)
 
     def read(self):
         lines = super().read()
@@ -124,7 +124,7 @@ class M22ConfigFileManager(M22FileManager):
 
 
 class M22LogFileManager(M22FileManager):
-    def __init__(self, filename: str = 'output', file_extension: str = 'log', timestamped_filename: bool = True):
+    def __init__(self, filename: str = 'output', file_extension: str = 'log', timestamped_filename: bool = False):
         super().__init__(filename, file_extension, timestamped_filename)
 
     def write(self, line: str, show_timestamp: bool = True):

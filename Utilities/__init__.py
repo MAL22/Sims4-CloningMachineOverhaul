@@ -45,14 +45,14 @@ def extract_folder(ea_folder, gameplay_folder):
                 extract_subfolder(root, filename, ea_folder)
 
 
-def compile_module(creator_name, mod_name, root_path, src_path, temp_path, build_path, mods_folder):
-    mod_name = creator_name + '_' + mod_name
+def compile_module(creator_name, project_name, root_path, src_path, temp_path, build_path, mods_folder):
+    mod_name = creator_name + '_' + project_name.replace(' ', '')
     mod_archive = mod_name + '.ts4script'
 
     exclude_file = {'copy.py', 'compile.py', f"{mod_archive}"}
     exclude_folder = {'__pycache__', 'temp', 'assets', 'EA'}
 
-    print('Scanning \'{}\'...'.format(mod_name.replace(creator_name + '_', '')))
+    print('Scanning \'{}\'...'.format(project_name))
     print('Ignored file{}: {}'.format('s' if len(exclude_file) > 1 else '', ', '.join(exclude_file)))
     print('Ignored folder{}: {}'.format('s' if len(exclude_folder) > 1 else '', ', '.join(exclude_folder)))
 
@@ -113,11 +113,14 @@ def copy_module(root_path, src_path, dev_path, dev_scripts_path):
         subs[:] = [sub for sub in subs if sub not in exclude]
         rel_module_path = ''.join(folder.rsplit(root_path))
         module_path = os.path.join(dev_scripts_path, *rel_module_path[1:].split('\\')[1:])
+
         for file in files:
             fsrc = os.path.join(folder, file)
             fdst = os.path.join(module_path, file)
-            # print('\t' + fsrc + '\n\t' + fdst)
-            # print(f'{os.path.join(rel_module_path, file)}')
+
+            if not os.path.exists(os.path.dirname(fdst)):
+                os.makedirs(os.path.dirname(fdst))
+
             shutil.copyfile(fsrc, fdst)
             file_count += 1
     print(f'Copied {file_count} script(s)')

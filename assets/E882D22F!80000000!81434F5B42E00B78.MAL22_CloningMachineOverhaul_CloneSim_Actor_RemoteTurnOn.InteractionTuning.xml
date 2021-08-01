@@ -185,6 +185,15 @@
         </V>
       </U>
     </V>
+    <V t="inventory">
+      <U n="inventory">
+        <V n="contents_check" t="has_object_with_def">
+          <U n="has_object_with_def">
+            <T n="definition">73847</T>            
+          </U>        
+        </V>
+      </U>
+    </V>
   </L>
   <T n="time_overhead">30</T>
   <T n="visible">True</T>
