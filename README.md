@@ -6,7 +6,7 @@ Cloning Machine Overhaul is a Sims 4 mod that adds more depth and player choice 
 - 4 cloning options
   * Age: Create clones at any life stage. Starting from Child all the way up to Elder.
   * Sex: Pick between a masculine or a feminine body.
-  * Gender: Pick between a female or male gender.
+  * Gender: Pick between female or male.
   * Family Tie: Select whether clones are regarded as offsprings or siblings of their creator.
 
 - DNA cloning
