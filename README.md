@@ -18,10 +18,11 @@ Cloning Machine Overhaul is a Sims 4 mod that adds more depth and player choice 
 There are two main components that have to be packaged from source in order for this mod to be functional.
 
 - Package
-  - The package file is already pre-packaged within the assets folder for ease of use, it can be inserted directly into the game's mods folder with no hassle.
-  - alternatively, the xml tunings are also contained within the assets folder and can be used with S4S or S4PE to build an entirely new package file.
-    - Note that [S4S] (https://sims4studio.com/board/6/download-sims-studio-open-version) and [S4PE] (https://github.com/s4ptacle/Sims4Tools/releases/) are standalone programs and not supplied within this project.
+  - The package file is already pre-packaged within the [assets](assets) folder for ease of use, it can be inserted directly into the game's mods folder with no hassle.
+  - alternatively, the xml tunings are also contained within the [assets](assets) folder and can be used with [S4S](https://sims4studio.com/board/6/download-sims-studio-open-version) or [S4PE](https://github.com/s4ptacle/Sims4Tools/releases/) to build an entirely new package file.
+    - Note that [S4S](https://sims4studio.com/board/6/download-sims-studio-open-version) and [S4PE](https://github.com/s4ptacle/Sims4Tools/releases/) are standalone programs and not supplied within this project.
 
 - python
-  - To compile the Python source into a .ts4script archive, first, the required paths must be configured within MAL22/CloningMachineOverhaul#settings.py. 
-  - Following this, executing [compile.py] will compile and insert the Python source into the ts4script archive and add it to the build folder within the project. Additionally, [compile.py] will attempt to copy the file into the mods folder directly with the user's permission.
+  - To compile the Python source into a ts4script archive, first, the required paths must be configured within [settings.py](settings.py) 
+  - Following this, executing [compile.py](compile.py) will compile any .py files located in the [src](src) folder, store them within a ts4script archive and add it to the build folder within the project.
+  - Additionally, [compile.py](compile.py) will attempt to copy the file into the mods folder.
